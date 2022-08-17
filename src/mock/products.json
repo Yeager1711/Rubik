@@ -1,0 +1,158 @@
+[
+    {
+       "id": 1,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product1.png",
+        "icon": "fa-solid fa-star",
+        "name":"Sen đá (loại 1)",
+        "price_old": 140000,
+        "price_new":130000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+      {
+       "id": 2,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product//png/product11.png",
+        "icon": "fa-solid fa-star",
+        "name":"Sen đá (loại 2)",
+         "price_old": 145000,
+         "price_new":115000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+       "id": 3,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product3.png",
+        "icon": "fa-solid fa-star",
+        "name":"Sen đá (loại 3)",
+        "price_old": 160000,
+        "price_new":155000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+       "id": 4,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product4.png",
+        "icon": "fa-solid fa-star",
+        "name":"Sen đá (loại 4)",
+        "price_old": 160000,
+        "price_new":150000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+       "id": 5,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product5.png",
+        "icon": "fa-solid fa-star",
+        "name":"Chậu gốm sứ",
+        "price_old": 300000,
+        "price_new":240000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+       "id": 6,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product6.png",
+        "icon": "fa-solid fa-star",
+        "name":" Sen đá (loại 5)",
+        "price_old": 270000,
+        "price_new":230000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+       "id": 7,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product7.png",
+        "icon": "fa-solid fa-star",
+        "name":"Cây phát tài",
+        "price_old": 250000,
+        "price_new":240000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+       "id": 8,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product8.png",
+        "icon": "fa-solid fa-star",
+        "name":" Sen đá (loại 6)",
+        "price_old": 245000,
+        "price_new":240000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+       "id": 9,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product9.png",
+        "icon": "fa-solid fa-star",
+        "name":"Sen đá (loại 7)",
+        "price_old": 250000,
+        "price_new":210000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+       "id": 10,
+        "cls": "box",
+        "clss":"box-detail",
+        "checkClass": "list-title",
+        "img":"./product/png/product10.png",
+        "icon": "fa-solid fa-star",
+        "name":"Sen đá (loại 8)",
+        "price_old": 190000,
+        "price_new":175000,
+        "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      },
+
+      {
+        "id": 11,
+         "cls": "box",
+         "clss":"box-detail",
+         "checkClass": "list-title",
+         "img":"./product/png/product2.png",
+         "icon": "fa-solid fa-star",
+         "name":"Chậu cây cảnh",
+          "price_old": 170000,
+          "price_new":140000,
+         "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+       },
+
+       {
+        "id": 12,
+         "cls": "box",
+         "clss":"box-detail",
+         "checkClass": "list-title",
+         "img":"./product/png/product12.png",
+         "icon": "fa-solid fa-star",
+         "name":"Sen đá (loại 9)",
+         "price_old": 210000,
+         "price_new":195000,
+         "describe":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio deserunt aspernatur fugiat minus enim ullam repudiandae sint sed magnam tenetur! Lorem ipsum dolor sit amet consectetur adipisicing elit."
+       }
+
+       
+]

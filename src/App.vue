@@ -1,32 +1,140 @@
 <template>
   <div id="app">
-    <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </nav>
-    <router-view/>
+      <div class="wrapper">
+          <comp-header />
+
+          <router-view />
+      </div>
+
+      <comp-new-letter />
   </div>
 </template>
 
+<script>
+import CompHeader from './components/CompHeader.vue'
+import CompNewLetter from './components/CompNew_Letter.vue'
+
+
+export default {
+  name: 'App',
+  components: { CompHeader, CompNewLetter}
+}
+</script>
+
 <style lang="scss">
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400;1,500&family=Nunito:wght@200;300;400;600;700&family=Open+Sans:ital,wght@0,300;0,400;0,600;1,300;1,500;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700&family=Poppins:wght@100;300;400;500;600&display=swap");
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  font-family: "Montserrat", sans-serif;
+  padding: 0;
+  margin: 0;
+  border: none;
+  box-sizing: border-box;
+  list-style: none;
+  outline: none;
+  text-decoration: none;
+  text-transform: capitalize;
+  transition: all 0.2s;
+  background: #f5f5f5;
 }
 
-nav {
-  padding: 30px;
+.wrapper{
+    display: flex;
+    overflow: hidden;
+}
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+html {
+  font-size: 62.5%;
+  overflow-x: none;
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+  transition: all .2s;
 
-    &.router-link-exact-active {
-      color: #42b983;
+    &::-webkit-scrollbar {
+       display: none;
     }
+}
+
+.owl-theme {
+  .owl-nav {
+    display: none;
+  }
+}
+
+
+.owl-theme{
+    .owl-dots{
+      display: none;
+        position: absolute;
+        bottom: 0;
+    }
+} 
+
+// swalalert2
+.swal2-container.swal2-center.swal2-backdrop-show {
+    z-index: 111111111111111;
+}
+
+div#swal2-html-container {
+    font-size: 1.5rem;
+}
+
+h2#swal2-title {
+  font-family: "Nunito";
+  font-size: 1.5rem;
+}
+
+section {
+  padding: 4% 4% 4% 2%;
+  width: 100%;
+}
+
+body{
+  margin:0;
+}
+
+.heading {
+  text-align: center;
+  font-size: 3rem;
+  color: #333;
+  padding-bottom: 1rem;
+  span {
+    color: #3cb815;
+  }
+}
+
+a{
+  list-style: none;
+  text-decoration: none;
+}
+
+button {
+  outline: none;
+  border: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 1200px) {
+  html {
+    font-size: 55%;
+  }
+}
+
+@media (max-width: 991px) {
+  section {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+}
+
+@media (max-width: 450px) {
+  html {
+    font-size: 50%;
   }
 }
 </style>

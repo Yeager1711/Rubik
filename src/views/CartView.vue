@@ -1,12 +1,12 @@
 <template>
-  <comp-home />
+  <comp-cart />
 </template>
 
 <script>  
-import CompHome from '@/components/CompHome.vue'
+import CompCart from '@/components/CompCart.vue'
 export default {
   components:{
-    CompHome
+    CompCart
   }
 }
 </script>
