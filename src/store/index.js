@@ -68,9 +68,10 @@ export default new Vuex.Store({
 
     // ---view Model-detail end---//
 
-    // async getSearchResults() {
-      
-    // }
+    // button show cart queries 900px
+    showCart({commit}) {
+      commit("ButtonShowCart");
+    }
   },
 
   mutations: {
@@ -146,6 +147,12 @@ export default new Vuex.Store({
         state.storeCart = state.storeCart.filter(product => product.id !== id)
       }
     },
+
+    // ----------------------------//
+    ButtonShowCart() {
+      const cart = document.querySelector('.cart');
+      cart.classList.toggle('active')
+    }
   },
 
   modules: {

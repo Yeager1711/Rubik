@@ -1,7 +1,7 @@
 <template>
   <section class="cart">
     <h2 class="heading">
-      Giỏ Hàng
+      Đơn hàng của tôi
       <div class="image-heading">
         <img src="./images/cart-img.png" alt="" />
 
@@ -26,23 +26,20 @@
           </div>
 
           <div class="list-name">
-            <span> {{ item.name }} </span>
-          </div>
-
-          <div class="list-price">
-            <span>{{ item.price_new }}đ</span>
+            <span class="name"> {{ item.name }} </span>
+            <span class="price"><p>giá:</p> {{ ConvertPrice(item.price_new)}}</span>
           </div>
 
           <div class="quantity">
-            <button @click="reduceQty(item.id)">-</button>
-            {{ item.qty }}
             <button @click="addQty(item.id)">+</button>
+            {{ item.qty }}
+            <button @click="reduceQty(item.id)">-</button>
           </div>
         </div>
       </div>
 
       <div class="cart-summary">
-        <h3 class="title">Tổng số giỏ hàng</h3>
+        <h3 class="title">Hóa đơn giỏ hàng</h3>
 
         <div class="subtotal">
           <span>Số lượng: </span>
@@ -59,7 +56,7 @@
           <span class="list-value"> {{ totalPrice }} </span>
         </div>
 
-        <router-link to="/checkout" class="checkout"> Thanh toán</router-link>
+        <div @click="showAlert()" class="checkout"> Thanh toán</div>
       </div>
     </div>
   </section>
@@ -89,6 +86,22 @@ export default {
 
   methods: {
     ...mapActions(["addQty", "reduceQty", "removeItem"]),
+
+    ConvertPrice(price) {
+      return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      }).format(price);
+    },
+
+    showAlert() {
+      // Use sweetalert2
+      this.$swal.fire({
+        icon: 'error',
+        title: 'Đường dẫn chưa được liên kết đến "Payment"',
+        // text: "Sản phẩm được thêm vào giỏ hàng 😉",
+      });
+    },
   },
 };
 </script>
@@ -96,31 +109,22 @@ export default {
 <style lang="scss" scoped>
 
 .cart {
-  background: url(../components/images/background/bg-checkout.webp) no-repeat;
-  background-size: cover;
-  width: 100%;
-  min-height: 100vh;
+  background: #eeeeee;
   position: relative;
-  z-index: 0;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: -1;
-  }
+  top: 0;
+  right: 0;
+  bottom: 0;
+  min-width: 24.5%;
+  overflow: auto;
 
   .heading {
     text-align: left;
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: 600;
-    color: #fff;
+    color: #333;
     font-family: "Nunito";
     display: flex;
-    margin: auto;
+    margin-top: 2rem;
 
     .image-heading {
       position: relative;
@@ -150,16 +154,13 @@ export default {
   }
 
   .box-container {
-    display: flex;
-    flex-wrap: wrap;
     justify-content: space-between;
     gap: 1rem;
 
     .table-cart {
-      flex: 1 1 40rem;
-      padding: 0 1rem;
+      padding: 0 1rem 1rem 0;
       width: 100%;
-      height: 35rem;
+      height: 27rem;
       border-radius: 1rem;
       overflow-y: auto;
 
@@ -168,7 +169,7 @@ export default {
       }
 
       &::-webkit-scrollbar-thumb {
-        background: #fafafc;
+        background: #333;
         border-radius: 5rem;
       }
 
@@ -179,13 +180,10 @@ export default {
       .box {
         max-width: 100%;
         display: flex;
-        flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        background: #f5f5f5;
-        border: .1rem solid #dbdbdb;
         border-radius: 1rem;
-        padding: 0.1rem 2rem;
+        padding: .5rem;
         margin: 1rem 0;
         position: relative;
 
@@ -196,8 +194,9 @@ export default {
 
         .btn-remove {
           position: absolute;
-          top: 0;
-          right: 1rem;
+          top: -1.5rem;
+          right: .5rem;
+          transform: rotate(90deg);
           font-size: 1.7rem;
           padding: 0.7rem;
           color: #333;
@@ -207,34 +206,47 @@ export default {
           }
         }
 
-        .list-image {
-          width: 7rem;
-          height: auto;
-          overflow: hidden;
-          border-radius: 1rem;
-          img {
-            max-width: 100%;
+        .list-image{
+          max-width: 7rem;
+
+          img{
+            width: 100%;
           }
         }
 
         .list-name {
-          span {
+    
+          .name {
+            display: inline-block;
+            
             font-family: "Nunito";
-            font-weight: 550;
-            font-size: 1.7rem;
-          }
-        }
-
-        .list-price {
-          span {
-            font-family: "Nunito";            
-            font-weight: 550;
+            font-weight: 750;
             font-size: 1.5rem;
+          }
+
+          .price{
+            color: #eb2f5b;
+            font-family: "Nunito";            
+            font-weight: 650;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+
+            p{
+              text-transform: none;
+              color: #333;
+              margin-right: .3rem;
+              font-size: 1.4rem;
+            }
           }
         }
 
         .quantity {
-          padding: 2rem;
+          border: .1rem solid #aaa;
+          border-radius: 5rem;
+          margin: 0 .5rem;
+          display: flex;
+          align-items: center;
           font-size: 1.6rem;
 
           button {
@@ -242,7 +254,7 @@ export default {
             border: none;
             font-size: 2rem;
             border-radius: 0.5rem;
-            margin: 0 1rem;
+            margin: 0 .5rem;
 
             &:hover {
               cursor: pointer;
@@ -253,16 +265,12 @@ export default {
     }
 
     .cart-summary {
-      flex: 1 1 10rem;
-      width: 100%;
+      border: .1rem dashed #333 ;
+      max-width: 100%;
       height: 100%;
       max-height: 40rem;
       padding: 2rem;
       border-radius: .5rem;
-      // background: #f5f7fa;
-        background: rgba(255, 255, 255, 0.9);
-      // box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.4);
-      box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.2);
 
       .title {
         text-transform: none;
@@ -315,6 +323,43 @@ export default {
         }
       }
     }
+  }
+}
+
+@media (max-width: 1200px) {
+  html {
+    font-size: 55%;
+  }
+}
+
+@media (max-width: 991px) {
+  section {
+    padding: 2rem;
+  }
+
+  .cart{
+        position: fixed;
+        top: 0;
+        right: -100%;
+        bottom: 0;
+        transition: .3s ease;
+        width: 32rem;
+
+      &.active{
+        z-index: 99998 !important;
+        transition: .3s ease;
+        right: 1rem;
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.3);
+      }
+  }
+}
+
+@media (max-width: 768px) {
+}
+
+@media (max-width: 450px) {
+  html {
+    font-size: 50%;
   }
 }
 </style>

@@ -36,6 +36,7 @@ export default {
     .newletter {
       padding: 2% 6% 2% 6%;
       background: #333;
+      margin-bottom: 5rem;
       
 
       .box-container{

@@ -5,7 +5,7 @@
 
           <router-view />
       </div>
-
+      <comp-queries />
       <comp-new-letter />
   </div>
 </template>
@@ -13,11 +13,11 @@
 <script>
 import CompHeader from './components/CompHeader.vue'
 import CompNewLetter from './components/CompNew_Letter.vue'
-
+import CompQueries from './components/CompQueries.vue';
 
 export default {
   name: 'App',
-  components: { CompHeader, CompNewLetter}
+  components: { CompHeader, CompNewLetter, CompQueries}
 }
 </script>
 
@@ -85,7 +85,7 @@ h2#swal2-title {
 }
 
 section {
-  padding: 4% 4% 4% 2%;
+  padding: 2rem 1rem;
   width: 100%;
 }
 
@@ -95,7 +95,7 @@ body{
 
 .heading {
   text-align: center;
-  font-size: 3rem;
+  font-size: 2rem;
   color: #333;
   padding-bottom: 1rem;
   span {

@@ -120,6 +120,7 @@ export default {
 
       .box{
         display: flex;
+        flex-wrap: wrap;
 
         &.second{
           flex-direction: row-reverse; 
@@ -185,4 +186,32 @@ export default {
       }
     }
   }
+
+  
+@media (max-width: 1200px) {
+  html {
+    font-size: 55%;
+  }
+}
+
+@media (max-width: 991px) {
+  section {
+    padding: 2rem;
+  }
+
+  .about{
+    .about-title{
+      left: 5%;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+}
+
+@media (max-width: 450px) {
+  html {
+    font-size: 50%;
+  }
+}
 </style>
