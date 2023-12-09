@@ -1,45 +1,53 @@
 <template>
   <section class="cart">
     <h2 class="heading">
-      Đơn hàng của tôi
+      Giỏ hàng của tôi
       <div class="image-heading">
         <img src="./images/cart-img.png" alt="" />
-
-        <span> {{ totalQuantity }} </span>
+        <span> {{ orders.length }} </span>
       </div>
     </h2>
 
     <div class="box-container">
       <div class="table-cart">
-        <div v-for="item in storeCart" 
-        :key="item.id" 
-        :class="item.cls"
-        >
-          <div class="btn-remove" 
-            @click="removeItem(item.id)"
-          > 
-            <i class="fa-solid fa-xmark"></i> 
+        <div v-if="orders.length === 0" style="position: relative;display: flex;">
+          <div style="margin: auto; 
+                text-align: center; 
+                font-size: 13px; 
+                color: #999; 
+                text-transform: none;">
+            <img src="./images/cart-empty.png" alt="" style="width: 20rem; margin: auto;">
+            <p>Không có đơn hàng nào</p>
           </div>
+        </div>
 
-          <div class="list-image">
-            <img :src="item.img" alt="" />
-          </div>
+        <div v-else>
+          <div v-for="item in orders" :key="item.product_id" class="order-container">
+            <div class="list-image">
+              <img :src="deccoImage(item.product.image_product)" alt="">
+            </div>
+            <div class="list-name">
+              <span class="name">{{ item.product ? item.product.name_product : 'Sản phẩm không xác định' }}</span>
 
-          <div class="list-name">
-            <span class="name"> {{ item.name }} </span>
-            <span class="price"><p>giá:</p> {{ ConvertPrice(item.price_new)}}</span>
-          </div>
+              <div class="quantity">
+                <button class="decrease" @click="decreaseQuantity(item)"> - </button>
+                <span class="value">{{ item.quantity }}</span>
+                <button class="increase" @click="increaseQuantity(item)"> + </button>
+              </div>
+            </div>
 
-          <div class="quantity">
-            <button @click="addQty(item.id)">+</button>
-            {{ item.qty }}
-            <button @click="reduceQty(item.id)">-</button>
+
+            <div class="totalItem-amount">
+              <span>{{ totalPrice(item?.amount) }}</span>
+            </div>
+
+            <div class="fa-solid fa-xmark btn-removeItem" @click="confirmRemoveItem(item)"></div>
           </div>
         </div>
       </div>
 
       <div class="cart-summary">
-        <h3 class="title">Hóa đơn giỏ hàng</h3>
+        <h3 class="title">Tổng giỏ hàng</h3>
 
         <div class="subtotal">
           <span>Số lượng: </span>
@@ -48,66 +56,258 @@
 
         <div class="delivery">
           <span>Giao hàng: </span>
-          <span class="list-value"> Free</span>
+          <span class="list-value"> miễn phí</span>
         </div>
 
         <div class="total">
           <span>Tổng thanh toán: </span>
-          <span class="list-value"> {{ totalPrice }} </span>
+          <span class="list-value" style="color: #ee4d2d;"> {{ totalAmount }} </span>
         </div>
 
-        <div @click="showAlert()" class="checkout"> Thanh toán</div>
+        <a class="checkout" v-if="orders.length > 0" @click.prevent="confirmOrder">
+          Xác nhận đơn hàng
+        </a>
+        <div v-else style="background: #999;" class="checkout">
+          Xác nhận đơn hàng
+        </div>
+
       </div>
     </div>
+
   </section>
 </template>
 
+
 <script>
-import { mapGetters, mapActions } from "vuex";
+import axios from "axios";
+import Swal from 'sweetalert2';
+import { mapActions } from "vuex";
+import Cookies from 'js-cookie';
+import store from '@/store';
+
 
 export default {
   name: "comp-cart",
-  "types": [
-    "vue-sweetalert2"
-  ],
+  data() {
+    return {
+      orders: [],
+      quantityToUpdate: 0
+    };
+  },
+
   computed: {
-    ...mapGetters(["storeCart", "storeView"]),
     totalQuantity() {
-      return this.storeCart.reduce((a, b) => a + b.qty, 0);
+      return this.orders.reduce((total, item) => total + item.quantity, 0);
     },
 
-    totalPrice() {
-      return new Intl.NumberFormat("de-DE", {
-        style: "currency",
-        currency: "VND",
-      }).format(this.storeCart.reduce((a, b) => a + b.qty * b.price_new, 0));
+    totalAmount() {
+      const total = this.orders.reduce((sum, item) => sum + item.amount, 0);
+      return this.totalPrice(total)
     },
+
+    deccoImage: function () {
+      return function (base64) {
+        return `data:image/png;base64,${base64}`
+      }
+    }
   },
 
   methods: {
     ...mapActions(["addQty", "reduceQty", "removeItem"]),
 
-    ConvertPrice(price) {
+    async fetchCart() {
+      try {
+        // Đọc user_id từ cookies
+        const userId = Cookies.get('user_id');
+
+        // Gửi yêu cầu với user_id
+        const response = await axios.get(`http://localhost:4000/api/carts/${userId}`);
+        console.log("Phản hồi API giỏ hàng:", response.data);
+        this.orders = response.data;
+
+        if (this.orders.length > 0) {
+          await this.fetchAndUpdateProducts();
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy giỏ hàng:", error);
+      }
+    },
+
+    async fetchAndUpdateProducts() {
+      console.log("Fetching and updating product details...");
+
+      const promises = this.orders.map(async (order) => {
+        if (this.isValidOrder(order)) {
+          console.log("Processing order: ", order)
+          try {
+            const productId = order.product_id;
+            const response = await axios.get("http://localhost:3005/api/products/" + productId);
+            console.log("API Response for product details:", response.data);
+
+            if (this.isValidProductResponse(response)) {
+              console.log("Product details:", response.data);
+              // Update the product array for each order
+              this.$set(order, 'product', response.data);
+            } else {
+              console.error("Invalid product response:", response.data);
+            }
+          } catch (error) {
+            console.error("Error fetching product details:", error);
+          }
+        }
+      });
+
+      try {
+        await Promise.all(promises);
+      } catch (error) {
+        console.error("Error while fetching and updating:", error);
+      }
+    },
+
+    isValidOrder(order) {
+      return order && order.product_id;
+    },
+
+    isValidProductResponse(response) {
+      return response && response.data;
+    },
+
+    totalPrice(amount) {
       return new Intl.NumberFormat("vi-VN", {
         style: "currency",
         currency: "VND",
-      }).format(price);
+      }).format(amount)
     },
 
-    showAlert() {
-      // Use sweetalert2
-      this.$swal.fire({
-        icon: 'error',
-        title: 'Đường dẫn chưa được liên kết đến "Payment"',
-        // text: "Sản phẩm được thêm vào giỏ hàng 😉",
-      });
+    increaseQuantity(item) {
+      item.quantity += 1;
+      this.updateTotalAmount(item);
+      this.quantityToUpdate = item.quantity;
     },
+
+    decreaseQuantity(item) {
+      if (item.quantity > 1) {
+        item.quantity -= 1;
+        this.updateTotalAmount(item);
+        this.quantityToUpdate = item.quantity;
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: "Số lượng không nhỏ hơn 1"
+        })
+      }
+    },
+
+    updateTotalAmount(item) {
+      const amount = item.quantity * item.product.price;
+      this.$set(item, 'amount', amount);
+    },
+
+    async confirmRemoveItem(item) {
+      const confirmation = await Swal.fire({
+        title: 'Xác nhận xóa sản phẩm',
+        text: 'Bạn muốn xóa sản phẩm khỏi giỏ hàng?',
+        icon: 'question',
+        showCancelButton: true,
+        cancelButtonText: 'Không',
+        confirmButtonText: 'Có',
+      });
+
+      if (confirmation.isConfirmed) {
+        this.removeItemFromCart(item);
+      }
+    },
+
+    //Xóa item product trong giỏ hàng
+    async removeItemFromCart(item) {
+      try {
+        const responseRemoveitemCart = await axios.post('http://localhost:4000/api/removeItemFromCart', { orderId: item.order_id, productId: item.product_id });
+
+        // Rest of your code
+        if (responseRemoveitemCart.data.success) {
+          this.fetchCart();
+          Swal.fire({
+            title: 'Đã xóa sản phẩm',
+            icon: 'success',
+          });
+          this.fetchCart();
+
+          // setTimeout(() => {
+          //   location.reload();
+          // }, 1000);
+        } else {
+          Swal.fire({
+            title: 'Lỗi khi xóa sản phẩm',
+            text: 'Đã có lỗi xảy ra khi xóa sản phẩm khỏi giỏ hàng.',
+            icon: 'error',
+          });
+        }
+      } catch (error) {
+        console.error('Lỗi khi xóa sản phẩm:', error);
+      }
+    },
+
+    //cập nhật value số lượng của từng product trong giỏ hàng
+    async confirmOrder() {
+      try {
+        const confirmation = await Swal.fire({
+          title: 'Xác nhận đơn hàng',
+          text: 'Bạn có chắc chắn muốn xác nhận đơn hàng?',
+          icon: 'question',
+          showCancelButton: true,
+          cancelButtonText: 'Không',
+          confirmButtonText: 'Có',
+        });
+
+        if (confirmation.isConfirmed) {
+          for (const item of this.orders) {
+            await this.updateOrderDetails(item);
+          }
+
+          // After updating quantities, navigate to the checkout page
+          this.$router.push('/checkout');
+        }
+      } catch (error) {
+        console.error('Lỗi khi xử lý yêu cầu xác nhận đơn hàng:', error);
+      }
+    },
+
+    async updateOrderDetails(item) {
+      try {
+        const orderData = {
+          orderId: item.order_id,
+          productId: item.product_id,
+          newQuantity: item.quantity,
+          newAmount: item.product.price * item.quantity,
+          userId: Cookies.get('user_id')
+        };
+
+        // Call the endpoint to update the quantity for each item
+        const responseUpdateOrderdetails = await axios.post('http://localhost:4000/api/updateOrderDetails', orderData);
+
+        console.log('API Response:', responseUpdateOrderdetails.data);
+
+        if (!responseUpdateOrderdetails.data.success) {
+          console.error("Cập nhật số lượng thất bại cho sản phẩm:", item.product.name_product);
+        }
+      } catch (error) {
+        console.error('Lỗi khi cập nhật số lượng sản phẩm:', error);
+      }
+    },
+  },
+
+  mounted() {
+    // Lấy giá trị từ store khi component được tạo
+    console.log("QuantityToUpdate on mount:", store.state.quantityToUpdate);
+    this.quantityToUpdate = store.state.quantityToUpdate;
+    this.fetchCart();
   },
 };
 </script>
 
-<style lang="scss" scoped>
 
+
+<style lang="scss" scoped>
 .cart {
   background: #eeeeee;
   position: relative;
@@ -147,7 +347,7 @@ export default {
         font-size: 1.1rem;
         border-radius: 100%;
         right: -0.9rem;
-        top: 0;
+        top: -.7rem;
         z-index: 2;
       }
     }
@@ -156,6 +356,7 @@ export default {
   .box-container {
     justify-content: space-between;
     gap: 1rem;
+    margin: auto;
 
     .table-cart {
       padding: 0 1rem 1rem 0;
@@ -177,95 +378,71 @@ export default {
         background: rgba(255, 255, 255, 0.2);
       }
 
-      .box {
-        max-width: 100%;
+
+      .order-container {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        border-radius: 1rem;
-        padding: .5rem;
-        margin: 1rem 0;
-        position: relative;
+        justify-content: space-between;
 
-        &:hover {
-          transition: 0.2s linear;
-          transform: scale(0.98);
-        }
+        .list-image {
+          width: 15rem;
+          overflow: hidden;
 
-        .btn-remove {
-          position: absolute;
-          top: -1.5rem;
-          right: .5rem;
-          transform: rotate(90deg);
-          font-size: 1.7rem;
-          padding: 0.7rem;
-          color: #333;
-
-          &:hover {
-            cursor: pointer;
-          }
-        }
-
-        .list-image{
-          max-width: 7rem;
-
-          img{
+          img {
             width: 100%;
+            height: 100%;
+            scale: 1.1;
           }
         }
 
         .list-name {
-    
-          .name {
-            display: inline-block;
-            
-            font-family: "Nunito";
-            font-weight: 750;
-            font-size: 1.5rem;
+          width: 90%;
+          font-weight: 600;
+
+          span {
+            font-size: 1.3rem;
           }
 
-          .price{
-            color: #eb2f5b;
-            font-family: "Nunito";            
-            font-weight: 650;
-            font-size: 1.5rem;
+          .quantity {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+            text-align: center;
+            margin-top: .7rem;
+            border: .1rem solid #999;
+            border-radius: 5rem;
+            width: 7rem;
 
-            p{
-              text-transform: none;
-              color: #333;
-              margin-right: .3rem;
-              font-size: 1.4rem;
+            .increase,
+            .decrease {
+              font-size: 1.6rem;
+              padding: 0 .7rem;
             }
+          }
+
+        }
+
+
+        .totalItem-amount {
+          span {
+            font-size: 1.4rem;
+            color: #ee4d2d;
+            font-weight: 550;
           }
         }
 
-        .quantity {
-          border: .1rem solid #aaa;
-          border-radius: 5rem;
-          margin: 0 .5rem;
-          display: flex;
-          align-items: center;
-          font-size: 1.6rem;
-
-          button {
-            background: #f5f5f5;
-            border: none;
-            font-size: 2rem;
-            border-radius: 0.5rem;
-            margin: 0 .5rem;
-
-            &:hover {
-              cursor: pointer;
-            }
-          }
+        .btn-removeItem {
+          padding: 1rem;
+          margin-left: 2rem;
+          cursor: pointer;
+          font-size: 2rem;
         }
       }
     }
 
     .cart-summary {
-      border: .1rem dashed #333 ;
+      border: .1rem dashed #333;
       max-width: 100%;
       height: 100%;
       max-height: 40rem;
@@ -294,7 +471,7 @@ export default {
           font-weight: 550;
         }
 
-        .list-value{
+        .list-value {
           text-transform: none;
           font-family: "Montserrat";
           margin-bottom: 1rem;
@@ -337,25 +514,24 @@ export default {
     padding: 2rem;
   }
 
-  .cart{
-        position: fixed;
-        top: 0;
-        right: -100%;
-        bottom: 0;
-        transition: .3s ease;
-        width: 32rem;
+  .cart {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    bottom: 0;
+    transition: .3s ease;
+    width: 32rem;
 
-      &.active{
-        z-index: 99998 !important;
-        transition: .3s ease;
-        right: 1rem;
-        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.3);
-      }
+    &.active {
+      z-index: 99998 !important;
+      transition: .3s ease;
+      right: 1rem;
+      box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.3);
+    }
   }
 }
 
-@media (max-width: 768px) {
-}
+@media (max-width: 768px) {}
 
 @media (max-width: 450px) {
   html {

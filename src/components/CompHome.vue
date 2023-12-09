@@ -9,7 +9,7 @@
       <div
         v-for="(banner, index) in homeItems"
         :key="`banner-${index}`"
-        :class="banner.cls"
+        class="box-slide"
       >
         <div class="image">
           <img :src="banner.image" alt="" />
@@ -49,7 +49,6 @@ export default {
 
       homeItems: [
         {
-          cls: "box-slide",
           image: require("./images/homeSlide1.webp"),
           text1: "TUYỆT VỜI TỪ RUBIK",
           span_title: "TRANG TRÍ ",
@@ -59,7 +58,6 @@ export default {
         },
 
         {
-          cls: "box-slide",
           image: require("./images/homeSlide2.webp"),
           text1: "TUYỆT VỜI TỪ RUBIK",
           span_title: "CÂY TRỒNG",
@@ -69,7 +67,6 @@ export default {
         },
 
         {
-          cls: "box-slide",
           image: require("./images/homeSlide3.webp"),
           text1: "TUYỆT VỜI TỪ RUBIK",
           span_title: "SEN ĐÁ",

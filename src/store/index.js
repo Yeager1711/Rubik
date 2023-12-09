@@ -1,160 +1,122 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import products from '../mock/products.json'
+import Vue from 'vue';
+import Vuex from 'vuex';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
     products: [],
     storeCart: [],
-    storeView:[],
+    storeView: [],
+    selectedProductId: null,
+    quantityToUpdate: 0,
   },
-
   getters: {
     products: (state) => state.products,
     storeCart: (state) => state.storeCart,
     storeView: (state) => state.storeView,
-    // searchResult: (state) => state.products
   },
-
   actions: {
-    getProducts({ commit }) {
-      commit("getProductData")
+    viewModel({ commit }, product) {
+      commit('addToView', product);
     },
 
-    // ---Cart start--- //
-    // +thêm 
-    addToCart({ commit }, item) {
-      commit("addItemToCart", item)
+    addToCart({ commit }, product) {
+      commit('addItemToCart', product);
     },
 
-    // thêm số lượng
     addQty({ commit }, id) {
-      commit("addQty", id)
+      commit('addQty', id);
     },
-
-    // xóa số lượng
     reduceQty({ commit }, id) {
-      commit("reduceQty", id)
+      commit('reduceQty', id);
     },
-
-    // xóa giỏ hàng
     removeItem({ commit }, id) {
-      commit("removeItem", id)
-    },
-    // ---- end cart----//
-
-
-    
-    //  --- view Model-detail start---//
-    // thêm view
-    viewModel({commit}, id){
-      commit("addToView", id)
+      commit('removeItem', id);
     },
 
-    // xóa view
-    removeView({commit}, id){
-      commit("removeModel", id)
+    removeView({ commit }, id) {
+      commit('removeModel', id);
     },
-    
-    addQtyPopup({commit}, id){
-      commit("qtyPopup", id)
+    addQtyPopup({ commit }, id) {
+      commit('qtyPopup', id);
     },
-
-    removeQty({commit}, id) {
-      commit("removeQtyPopup", id)
+    removeQtyPopup({ commit }, id) {
+      commit('removeQtyPopup', id);
     },
-
-    // ---view Model-detail end---//
-
-    // button show cart queries 900px
-    showCart({commit}) {
-      commit("ButtonShowCart");
-    }
+    showCart({ commit }) {
+      commit('ButtonShowCart');
+    },
   },
-
   mutations: {
-
-    getProductData(state) {
-      state.products = products;
-    },
-
-    // POPUP DETAIL
-    //  + thêm view 
-    addToView(state, item){
-      const popUp = state.storeView.find((products) => products.id === item.id)
-      if(!popUp > 1) {
-        state.storeView.push({ ...item, qty: 1});
+    addToView(state, product) {
+      const popUp = state.storeView.find((products) => products.id === product.id);
+      if (popUp) {
         popUp.qty++;
-      }else {
-        state.storeView.push({ ...item, qty: 1})
-        popUp.qty++;
+      } else {
+        state.storeView.push({ ...product, qty: 1 });
       }
     },
 
-    // xóa view
-    removeModel(state, id){
-      state.storeView = state.storeView.filter(product => product.id !== id)
+    addItemToCart(state, product) {
+      const addedItem = state.storeCart.find((products) => products.id === product.id);
+      if (addedItem) {
+        addedItem.qty++;
+      } else {
+        state.storeCart.push({ ...product, qty: 1 });
+      }
     },
 
-    // thêm số lượng > Popup
-    qtyPopup(state, id){
-      const qtyPopup = state.storeView.find((products) => products.id === id)
-      qtyPopup.qty++
+    setCart(state, cart) {
+      state.storeCart = cart;
+      console.log("Updated storeCart in Vuex:", state.storeCart);
     },
 
-    // Xóa số lượng > Popup
+    setQuantityToUpdate(state, value) {
+      state.quantityToUpdate = value;
+    },
+
+
+
+
+
+
+
+    removeModel(state, id) {
+      state.storeView = state.storeView.filter((product) => product.id !== id);
+    },
+    qtyPopup(state, id) {
+      const qtyPopup = state.storeView.find((products) => products.id === id);
+      qtyPopup.qty++;
+    },
     removeQtyPopup(state, id) {
-      const qtyPopup = state.storeView.find((products) => products.id === id)
+      const qtyPopup = state.storeView.find((products) => products.id === id);
       if (qtyPopup.qty > 1) {
         qtyPopup.qty--;
       } else {
-        state.storeView = state.storeView.filter(products => products.id !== id)
+        state.storeView = state.storeView.filter((product) => product.id !== id);
       }
     },
 
-    // --------------------------------//
-
-    // CART
-    // thêm giỏ hàng
-    addItemToCart(state, item) {
-      const addedItem = state.storeCart.find((products) => products.id === item.id)
-      if (!addedItem) {
-        state.storeCart.push({ ...item, qty: 1 });
-      } else {
-        addedItem.qty++;
-      }
-    },
-
-    // xóa giỏ hàng
     removeItem(state, id) {
-      state.storeCart = state.storeCart.filter(product => product.id !== id)
+      state.storeCart = state.storeCart.filter((product) => product.id !== id);
     },
-
-    // thêm số lượng 
     addQty(state, id) {
-      const currentItem = state.storeCart.find((product) => product.id === id)
+      const currentItem = state.storeCart.find((product) => product.id === id);
       currentItem.qty++;
     },
-
-    // xóa số lượng
     reduceQty(state, id) {
-      const currentItem = state.storeCart.find((product) => product.id === id)
+      const currentItem = state.storeCart.find((product) => product.id === id);
       if (currentItem.qty > 1) {
         currentItem.qty--;
       } else {
-        state.storeCart = state.storeCart.filter(product => product.id !== id)
+        state.storeCart = state.storeCart.filter((product) => product.id !== id);
       }
     },
-
-    // ----------------------------//
     ButtonShowCart() {
       const cart = document.querySelector('.cart');
-      cart.classList.toggle('active')
-    }
+      cart.classList.toggle('active');
+    },
   },
-
-  modules: {
-  }
-})
+  modules: {},
+});

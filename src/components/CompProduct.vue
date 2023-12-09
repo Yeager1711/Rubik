@@ -4,54 +4,42 @@
     <section class="search-products">
       <form action="" class="form">
         <div class="box-search">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Tìm kiếm sản phẩm..."
-          />
+          <input type="text" v-model="searchQuery" placeholder="Tìm kiếm sản phẩm..." />
           <i class="fa-solid fa-magnifying-glass"></i>
         </div>
       </form>
 
       <div class="box-container-products">
-        <h3>Số lượng sản phẩm hiện có: {{resultQuery.length}}</h3>
+        <h3>Số lượng sản phẩm hiện có: {{ resultQuery.length }}</h3>
 
         <div class="products-box">
-          <div
-            v-for="(item, index) in resultQuery"
-            :key="`item-${index}`"
-            :class="item.cls"
-          >
+          <div v-for="(product, index) in filteredProducts" :key="`product-${index}`" class="box">
             <div class="image">
-              <img :src="item.img" alt="" />
+              <img :src="decodedImage(product.image_product)" alt="" />
             </div>
+
 
             <div class="content">
               <div class="evalute">
-                <div class="name">{{ item.name }}</div>
+                <div class="name">{{ product.name_product }}</div>
 
                 <div class="start">
-                  <i :class="item.icon"></i>
-                  <i :class="item.icon"></i>
-                  <i :class="item.icon"></i>
-                  <i :class="item.icon"></i>
-                  <i :class="item.icon"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
                 </div>
               </div>
 
               <div class="shopping">
                 <div class="price">
-                  <span class="price-old">
-                    {{ totalPrice(item?.price_old) }}
-                  </span>
-                  <span class="price-new">
-                    {{ totalPrice(item?.price_new) }}
-                  </span>
+                  <span class="price-old">{{ totalPrice(product.price) }}</span>
+                  <span class="price-new">{{ totalPrice(product.price) }}</span>
                 </div>
               </div>
 
-              <button class="shopping-cart" @click="viewModel(item)">
-                <!-- <ThemifyIcon icon="shopping-cart" /> -->
+              <button class="shopping-cart" @click="viewProduct(product)">
                 <i class="fa-solid fa-cart-shopping"></i>
               </button>
             </div>
@@ -59,29 +47,31 @@
         </div>
 
         <!-- popup detail view -->
-        <div v-for="item in storeView" :key="item.id" :class="item.clss">
+        <div v-for="item in storeView" :key="item.id" class="box-detail">
           <div class="detail-container">
-            <div
-              id="btn-closeDetail"
-              class="fa-solid fa-xmark"
-              @click="removeView(item.id)"
-            ></div>
+            <div id="btn-closeDetail" class="fa-solid fa-xmark" @click="removeView(item.id)"></div>
 
             <div class="detail-image">
-              <img :src="item.img" alt="" />
+              <img :src="decodedImage(item.image_product)" alt="" />
             </div>
 
             <div class="detail-content">
               <div class="list-name">
-                <h3>{{ item.name }}</h3>
+                <h3>{{ item.name_product }}</h3>
+              </div>
+              <div class="total-current">
+                <span>
+                  Còn lại:
+                  {{ item.total_product }}
+                </span>
               </div>
               <div class="list-evaluate">
                 <div class="start">
-                  <i :class="item.icon"></i>
-                  <i :class="item.icon"></i>
-                  <i :class="item.icon"></i>
-                  <i :class="item.icon"></i>
-                  <i :class="item.icon"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
                 </div>
 
                 <div class="review">
@@ -91,22 +81,23 @@
 
               <div class="list-price">
                 <span class="list-priceNew">
-                  {{ totalPrice(item?.price_new) }}
+                  {{ totalPrice(item?.price) }}
                 </span>
                 <span class="list-priceOld">{{
-                  totalPrice(item.price_old)
+                  totalPrice(item.price)
                 }}</span>
               </div>
 
               <div class="list-desc">
-                <p>{{ item.describe }}</p>
+                <p>{{ item.description }}</p>
               </div>
 
               <div class="switch-add">
-                <div class="add-button" @click="addToCart(item) == showAlert()">
+                <div class="add-button" @click="addToCart(item)">
                   <button>Thêm vào giỏ hàng</button>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -122,6 +113,9 @@
 // import ThemifyIcon from "vue-themify-icons";
 import { mapGetters, mapActions } from "vuex";
 import CompCart from "./CompCart.vue";
+import axios from "axios";
+import VueCookies from 'vue-cookies';
+
 
 export default {
   name: "comp-product",
@@ -132,28 +126,56 @@ export default {
   data() {
     return {
       searchQuery: "",
+      productsFromAPI: [],
+      priceFilter: null,
     };
   },
 
   computed: {
     ...mapGetters(["products", "storeView"]),
 
-    // lọc danh sách tìm kiếm thông qua data từ products
+    apiProducts() {
+      return this.productsFromAPI;
+    },
+
+    decodedImage: function () {
+      return function (base64) {
+        return `data:image/png;base64,${base64}`;
+      };
+    },
+
+    filteredProducts() {
+      let filteredProduct = this.productsFromAPI;
+
+      if (this.searchQuery) {
+        const searchQuery = this.searchQuery.toLowerCase();
+        filteredProduct = filteredProduct.filter((product) => {
+          return product.name_product.toLowerCase().includes(searchQuery);
+        })
+      }
+      return filteredProduct;
+    },
+
     resultQuery() {
       if (this.searchQuery) {
-        return this.products.filter((item) => {
+        return this.productsFromAPI.filter((item) => {
           return this.searchQuery
             .toLowerCase()
             .split("")
-            .every((v) => item.name.toLowerCase().includes(v));
+            .every((v) => item.name_product.toLowerCase().includes(v));
         });
       } else {
-        return this.products;
+        return this.productsFromAPI;
       }
+    },
+
+    showDetail() {
+      return this.storeView.length > 0;
     },
   },
 
   methods: {
+    // --------------------------------
     ...mapActions([
       "",
       "getProducts",
@@ -163,14 +185,24 @@ export default {
       "removeQty",
       "addToCart",
     ]),
+    // --------------------------------
 
     showAlert() {
       // Use sweetalert2
       this.$swal.fire({
         icon: "success",
         title: "Sản phẩm được thêm vào giỏ hàng 😉",
-        // text: "Sản phẩm được thêm vào giỏ hàng 😉",
       });
+    },
+
+    async fecthProductsData() {
+      try {
+        // Gọi API để lấy dữ liệu sản phẩm
+        const response = await axios.get("http://localhost:3005/api/products");
+        this.productsFromAPI = response.data;
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu sản phẩm:', error);
+      }
     },
 
     totalPrice(price) {
@@ -179,10 +211,43 @@ export default {
         currency: "VND",
       }).format(price);
     },
+
+    viewProduct(product) {
+      this.$store.dispatch('viewModel', product)
+    },
+
+    async addToCart(item) {
+      console.log('Item data from popup:', item);
+      try {
+        const response = await axios.post('http://localhost:4000/api/addToCart', {
+          userId: VueCookies.get('user_id'),
+          productId: item.Product_Id,
+          quantity: 1,
+          totalPrice: item.price,
+        });
+
+        // Xử lý phản hồi từ API
+        console.log(response.data);
+
+        // Hiển thị cảnh báo dựa trên phản hồi
+        if (response.data.success) {
+          this.showAlert('Sản phẩm đã được thêm vào giỏ hàng thành công.');
+          setTimeout(() => {
+            window.location.reload();
+          }, 900);
+        } else {
+          this.showAlert('Thêm sản phẩm vào giỏ hàng thất bại. Vui lòng thử lại.');
+        }
+      } catch (error) {
+        console.error('Lỗi khi thêm vào giỏ hàng:', error);
+        this.showAlert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
+      }
+    },
+
   },
 
   mounted() {
-    this.getProducts();
+    this.fecthProductsData();
   },
 };
 </script>
@@ -192,7 +257,7 @@ export default {
   display: flex;
   width: 100%;
   padding: 0 1rem;
-  
+
   .search-products {
     min-width: 71.5%;
 
@@ -224,7 +289,7 @@ export default {
           outline: none;
           font-size: 16px;
 
-          &::placeholder{
+          &::placeholder {
             font-size: 1.4rem;
           }
         }
@@ -245,21 +310,21 @@ export default {
     .box-container-products {
       margin-top: 2rem;
 
-      h3{
+      h3 {
         font-size: 1.5rem;
         text-transform: none;
       }
 
       .products-box {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(26rem, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(27rem, 1fr));
         gap: 1rem;
 
         .box {
           background: #fff;
           box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
           border-radius: 1rem;
-          padding: 1rem 0 0.5rem 0;
+          padding: .5rem 1rem .5rem 0;
           position: relative;
           overflow: hidden;
           display: flex;
@@ -331,7 +396,7 @@ export default {
 
               .price {
                 margin-top: 1rem;
-                
+
                 .price-old {
                   font-size: 1.3rem;
                   margin-right: 0.5rem;
@@ -405,6 +470,7 @@ export default {
           width: 85%;
           max-width: 70rem;
           display: flex;
+          align-items: center;
           animation: fadeIn 0.3s ease;
 
           #btn-closeDetail {
@@ -436,6 +502,19 @@ export default {
               h3 {
                 display: block;
                 font-size: 2.5rem;
+                margin-bottom: 1rem;
+              }
+            }
+
+            .total-current {
+              margin-bottom: 1rem;
+
+              span {
+                display: flex;
+                align-items: center;
+                font-size: 1.6rem;
+                font-weight: 550;
+                text-transform: none;
               }
             }
 

@@ -1,323 +1,433 @@
 <template>
   <section class="checkout">
-    <h2 class="heading">Nhập thông tin khách hàng</h2>
 
-    <div class="box-container">
-      <form action="">
-        <div class="inputBox">
-          <!-- <span>Nhập họ </span> -->
-          <input type="text" name="" placeholder="Nhập họ..."/>
+    <div class="title-text">
+      <img src="./images/logo.png" alt="">
+      <span>Thanh toán</span>
+    </div>
+
+    <div class="location-saved">
+      <h3>
+        <i class="fa-solid fa-location-dot"></i>
+        Địa chỉ nhận hàng
+      </h3>
+
+      <div class="container-saved">
+        <div class="contact-info">
+          <h3>{{ userInfo.full_name }} (+84)</h3>
+          <span>{{ userInfo.phone_number }}</span>
         </div>
 
-        <div class="inputBox">
-          <input type="text" name="" placeholder="Nhập tên..."/>
+        <div class="contact-local">
+          <p>{{ userInfo.address }}</p>
+        </div>
+        <div class="btn-changesLocal">
+          Thay đổi
+        </div>
+      </div>
+
+
+      <div class="ordersItem-container">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Đơn giá</th>
+              <th>Số lượng</th>
+              <th>Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(orderItem, index) in cartItems" :key="index">
+              <td>{{ orderItem.product.name_product }}</td>
+              <td style="font-weight: 550;">{{ formattedCurrency(orderItem.product.price) }}</td>
+              <td>{{ orderItem.quantity }}</td>
+              <td style="font-weight: 550;">{{ formattedCurrency(orderItem.amount) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="container-totalAmount">
+        <div class="heading">
+          <h3>Phương thức thanh toán</h3>
+
+          <form action="">
+            <p>Thanh toán khi nhận hàng</p>
+            <button type="submit">Đổi</button>
+          </form>
         </div>
 
-        <div class="inputBox">
-          <input type="email" name="" placeholder="Nhập email..."/>
+        <div class="wrap-total">
+          <p>
+            <span style="font-weight: 550;">
+              Tổng tiền hàng: {{ formattedCurrency(totalOrderAmount - shippingFee) }}
+            </span>
+          </p>
+
+          <p>
+            Phí vận chuyển:
+            <span :style="{ 'font-weight': shippingFee === 0 ? 550 : 'normal' }">
+              {{ shippingFee === 0 ? 'Miễn phí' : formattedCurrency(shippingFee) }}
+            </span>
+          </p>
+
+          <h3 style="margin-bottom: .5rem;">Tổng thanh toán: <p style="color: #ee4d2d; font-size: 2rem;"> {{
+            formattedCurrency(totalOrderAmount) }}</p>
+          </h3>
         </div>
 
-        <div class="inputBox">
-          <input type="text" name="" placeholder="Nhập địa chỉ..."/>
-        </div>
-
-        <div class="inputBox">
-          <input type="number" placeholder="Số điện thoại..."/>
-        </div>
-
-        <div class="inputBox">
-          <input type="number" placeholder="Nhập"/>
-        </div>
-
-        <div class="inputBox">
-          <textarea name="address" cols="30" rows="10" placeholder="Thêm chú thích"></textarea>
-        </div>
-      </form>
-
-      <div class="checkout-summary">
-        <h3 class="title">Đơn hàng của bạn</h3>
-
-        <div class="check-list">
-          <!-- show name products & price product -->
-            <div class="list-title">
-                <div class="check-products">
-                    <h3>Sản phẩm</h3>
-                </div>
-
-                <div class="check-total">
-                    <h3>Thành tiền</h3>
-                </div>
-            </div>
-
-        <!-- value(state, getters, actions): box-show: name & price -->
-              <div class="list-box">
-
-                <div v-for="item in storeCart" 
-                  :key="item.id" 
-                  :class="item.cls"
-                  >
-                    <div class="name-products">
-                      <img :src="item.img" alt="">
-                      <span> {{item.name}} </span> 
-                    </div>
-
-                    <div class="total-products">
-                      <span>  {{item.qty}} </span> 
-                    </div>
-
-                    <div class="price-list">
-                      <span> {{item.price_new}}đ </span> 
-                    </div>
-                </div>
-              </div>
-
-              <div class="list-sum">
-                <div class="title">
-                  <span>Tổng: </span>
-                </div>
-                <div class="sum">
-                  <span> {{checkPrice}} </span>
-                </div>
-              </div>
-        </div>
-
-        <button @click="showAlert" class="checkout-payment">
-          Thanh toán
-        </button>
+        <button class="orderButton" @click="placeOrder"> Đặt hàng </button>
       </div>
     </div>
   </section>
 </template>
 
 <script>
-
-import { mapGetters } from "vuex";
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import Swal from 'sweetalert2';
 
 export default {
   name: "comp-checkout",
-
-  computed:{
-     ...mapGetters(["storeCart"]),
-      checkQuantity() {
-        return this.storeCart.reduce((a, b) => a + b.qty, 0);
+  data() {
+    return {
+      cartItems: [],
+      userInfo: {
+        full_name: '',
+        address: '',
+        phone_number: ''
       },
+    }
+  },
 
-      checkPrice() { return new Intl.NumberFormat("de-DE", {
-        style: "currency",
-        currency: "VND",
-      }).format(this.storeCart.reduce((a, b) => a + b.qty * b.price_new, 0));
-      },
-      
+  mounted() {
+    this.fetchCartItems();
+    this.fetchUserInfo();
   },
 
   methods: {
-    showAlert() {
-      // Use sweetalert2
-      this.$swal.fire({
-        icon: 'success',
-        title: 'Thanh toán thành công 😉',
-        // text: "Sản phẩm được thêm vào giỏ hàng 😉",
-      });
+    async fetchCartItems() {
+      try {
+        const userId = Cookies.get('user_id');
+        const response = await axios.get(`http://localhost:4000/api/carts/${userId}`);
+        console.log("API Cart:", response.data);
+        this.cartItems = response.data;
+
+        if (this.cartItems.length > 0) {
+          await this.fetchUserInfo(userId);
+        }
+
+        if (this.cartItems.length > 0) {
+          await this.fetchAndUpdateProductsInCart();
+        }
+      } catch (error) {
+        console.log('Lỗi khi lấy thông tin giỏ hàng', error);
+      }
     },
-  }
-};
+
+    async fetchUserInfo(userId) {
+      console.log("Fetching details user in cart...");
+      try {
+        const response = await axios.get(`http://localhost:3007/api/user/${userId}`);
+        console.log("User details:", response.data);
+        this.userInfo = response.data;
+      } catch (error) {
+        console.log("Error fetching user details", error);
+      }
+    },
+
+    async fetchAndUpdateProductsInCart() {
+      console.log("Fetching and updating product details for cart items...");
+
+      const promises = this.cartItems.map(async (cartItem) => {
+        if (this.isValidCartItem(cartItem)) {
+          console.log("Processing cart item: ", cartItem)
+          try {
+            const productId = cartItem.product_id;
+            const response = await axios.get("http://localhost:3005/api/products/" + productId);
+            console.log("API Response for product details:", response.data);
+
+            if (this.isValidProductResponse(response)) {
+              console.log("Product details:", response.data);
+              // Update the product array for each cart item
+              this.$set(cartItem, 'product', response.data);
+            } else {
+              console.error("Invalid product response:", response.data);
+            }
+          } catch (error) {
+            console.error("Error fetching product details:", error);
+          }
+        }
+      });
+
+      try {
+        await Promise.all(promises);
+        this.calculateTotalAmount();
+      } catch (error) {
+        console.error("Error while fetching and updating:", error);
+      }
+    },
+
+    calculateTotalAmount() {
+      this.totalAmount = this.cartItems.reduce((total, cartItem) => {
+        return total + cartItem.amount;
+      }, 0);
+    },
+
+    isValidCartItem(cartItem) {
+      return cartItem && cartItem.orderDetail_id;
+    },
+
+    isValidProductResponse(response) {
+      return response && response.data;
+    },
+
+    async placeOrder() {
+      try {
+        const userId = Cookies.get('user_id');
+        const shippingTax = this.shippingFee; // Access the computed property without parentheses
+        const totalAmountWithShipping = this.totalOrderAmount + shippingTax;
+
+        // Gửi yêu cầu đặt hàng và truyền totalAmountWithShipping để lưu vào database
+        const response = await axios.post(`http://localhost:4000/api/placeOrder/${userId}`, {
+          shippingTax: shippingTax,
+          totalAmountWithShipping: totalAmountWithShipping,
+        });
+
+        if (response.data.success) {
+          // Hiển thị SweetAlert khi đặt hàng thành công
+          await Swal.fire({
+            icon: 'success',
+            title: 'Đặt hàng thành công!',
+            showConfirmButton: false,
+            timer: 1300,
+          });
+
+          // Reload trang sau khi đặt hàng thành công
+          setTimeout(() => {
+            location.reload();
+          }, 300);
+        } else {
+          // Hiển thị SweetAlert khi có lỗi
+          await Swal.fire({
+            icon: 'error',
+            title: 'Lỗi khi đặt hàng',
+            text: response.data.message,
+          });
+        }
+      } catch (error) {
+        console.error('Lỗi khi đặt hàng:', error);
+      }
+    },
+
+  },
+
+  computed: {
+    formattedCurrency() {
+      const formatter = new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+      });
+
+      return (value) => formatter.format(value);
+    },
+
+    totalOrderAmount() {
+      const subtotal = this.cartItems.reduce((total, orderItem) => {
+        return total + orderItem.amount;
+      }, 0);
+
+      // Tổng thanh toán (Tổng tiền hàng + Phí vận chuyển)
+      return subtotal + this.shippingFee;
+    },
+
+
+    shippingFee() {
+      // Tạo một mảng chứa các giá trị phí vận chuyển có thể
+      const possibleShippingFees = [0, 10000, 12000, 15000, 18000, 20000, 22000];
+
+      // Lấy ngẫu nhiên một giá trị từ mảng để hiển thị
+      const randomShippingFee = possibleShippingFees[Math.floor(Math.random() * possibleShippingFees.length)];
+
+      // Nếu có đơn hàng trong giỏ hàng, trả về phí vận chuyển ngẫu nhiên, ngược lại là 0
+      return this.cartItems.length > 0 ? randomShippingFee : 0;
+    },
+  },
+
+}
 </script>
 
 <style lang="scss" scoped>
 .checkout {
-  background: url(../components/images/background/bg-checkout2.webp) no-repeat;
-  background-position: center;
-  background-size: cover;
-  z-index: 0;
+  padding: 3rem;
 
-  .heading {
-    text-align: left;
-    font-size: 3rem;
-    font-weight: 550;
-    text-transform: none;
-    font-family: "Nunito";
+  .title-text {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+
+    img {
+      width: 9rem;
+    }
+
+    span {
+      font-size: 2.5rem;
+      font-weight: 550;
+      color: #ee4d2d;
+      position: relative;
+
+      &::before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        content: "";
+        width: 1px;
+        height: 100%;
+      }
+    }
   }
 
-  .box-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
+  .location-saved {
 
-    form {
-      flex: 1 1 50rem;
-      height: 100%;
-      min-height: 5rem;
+    h3 {
+      font-size: 1.5rem;
+    }
+
+    .container-saved {
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
       gap: 2rem;
+      padding: 2rem;
+      background: #fff;
       border-radius: 1rem;
-      padding: 2rem 1.5rem;
 
-      .inputBox {
-        flex: 1 1 20rem;
-        position: relative;
-        width: 100%;
-        border-radius: 0.5rem;
-        border: none;
-       
-        input,
-        textarea {
-          width: 100%;
-          padding: 0;
-          border-radius: .5rem;
-          height: auto;
-          border: 0.1rem solid #dcdcdc;
-          outline: none;
-          padding: 1rem 0 1rem 1rem;
-          background:none;
+      .contact-info {
+        flex: 1 -1 2rem;
 
-          &:focus{
-            transition: .2s linear;
-            border-color: #6a5af9;
+
+        h3 {
+          font-size: 1.5rem;
+          color: #183153;
+          margin: 0;
+          margin-bottom: .7rem;
+
+          i {
+            margin-right: .5rem;
           }
+        }
 
-          &::placeholder{
-            padding-left: 0;
+        span {
+          font-size: 1.3rem;
+          font-weight: 550;
+        }
+      }
+
+      .contact-local {
+        flex: 1 1 42rem;
+
+        p {
+          margin: auto;
+          font-size: 1.4rem;
+          text-transform: none;
+        }
+      }
+
+      .btn-changesLocal {
+        padding: .5rem 2rem;
+        color: #fff;
+        border-radius: .5rem;
+        background: #1e3050;
+        cursor: pointer;
+        font-size: 1.3rem;
+        text-transform: none;
+      }
+    }
+
+    .ordersItem-container {
+      width: 100%;
+      margin-top: 1rem;
+
+      table {
+        width: 100%;
+        background: #fff;
+        padding: 1rem;
+        border-radius: 1rem;
+
+        thead {
+          tr {
+            th {
+              font-size: 1.3rem;
+              padding: 1rem;
+            }
+          }
+        }
+
+        tbody {
+          tr {
+            td {
+              padding: 1rem;
+              text-align: center;
+              font-size: 1.3rem;
+            }
           }
         }
       }
     }
 
-    .checkout-summary {
-      flex: 1 1 30rem;
-      width: 100%;
-      height: 100%;
-      max-height: auto;
+    .container-totalAmount {
+      margin-top: 1rem;
+      background: #fff;
+      border-radius: 1rem;
       padding: 2rem;
-      border-radius: 0.5rem;
-      background: rgba(255, 255, 255, 0.7);
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
 
-      .title {
-        text-transform: none;
-        font-size: 2.3rem;
-        font-weight: 600;
-        font-family: "Nunito";
+      .heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        form {
+          display: flex;
+          align-items: center;
+
+          p {
+            font-size: 1.5rem;
+            margin-right: .7rem;
+          }
+
+          button {
+            margin-left: .7rem;
+            font-size: 1.4rem;
+            padding: 0 2rem;
+            height: 2.5rem;
+            border-radius: 1rem;
+            color: #fff;
+            background: #183153;
+          }
+        }
       }
 
-        .check-list{
-
-            .list-title{
-                display: flex;
-                justify-content: space-between;
-                border-bottom: .1rem solid #d5d5d5;
-                margin-bottom: 2rem;//cos thể fic khi co thuộc tính bên dưới
-                
-                .check-products {
-                  display: flex;
-                  align-items: center;
-
-                  h3{
-                      color: #333;
-                      font-size: 1.2rem;
-                      font-weight: 600;
-                      text-transform: uppercase;
-                  }
-                }
-
-                .check-total {
-                  display: flex;
-                  align-items: center;
-
-                  h3{
-                    font-size: 1.2rem;
-                    font-weight: 400;
-                    text-transform: uppercase;
-                    color: #333;
-                    font-weight: 600;
-                  }
-                }
-            }
-
-           .list-box {
-            padding: 0 .5rem 0 0;
-            margin: 1rem 0 3rem 0;
-            height: auto;
-            max-height: 20rem;
-            overflow: auto;
-
-            &::-webkit-scrollbar{
-              width: .3rem;
-            }
-            
-            &::-webkit-scrollbar-thumb{
-              background: #888;
-              border-radius: 5rem;
-            }
-
-            &::-webkit-scrollbar-track{
-              background: #fff;
-            }
-
-             .box{
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin: .7rem 0;
-              padding: .3rem 1rem;
-              background: #f5f5f5;
-              border: .1rem solid #d5d5d5;
-              border-radius: 5rem;
-              overflow: auto;
-
-              span{
-                font-family: "Nunito";
-                font-size: 1.5rem;
-                font-weight: 550;
-                text-transform: none;
-              }
-
-              .name-products{
-                display: flex;
-                align-items: center;
-                
-                img{
-                  margin-right: .5rem;
-                  width: 5rem;
-                }
-              }
-
-              .total-products{
-                text-align: center;
-              }
-            }
-           }
-
-           .list-sum {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
-
-            .sum{
-              font-weight: bolder;
-              font-size: 1.7rem;
-            }
-           }
+      .wrap-total {
+        p {
+          font-size: 1.4rem;
+          text-transform: none;
         }
-      
 
-      .checkout-payment {
-        text-transform: none;
-        display: inline-block;
-        padding: 0.8rem 0;
-        border-radius: 0.5rem;
-        font-size: 1.5rem;
+
+      }
+
+      .orderButton {
+        font-size: 1.4rem;
+        padding: 1rem 4rem;
+        text-transform: capitalize;
+        border-radius: 1rem;
         color: #fff;
-        background: #fbb710;
-        width: 100%;
-        text-align: center;
-        text-decoration: none;
+        background: #ee4d2d;
 
         &:hover {
-          cursor: pointer;
-          letter-spacing: 0.1rem;
-          transition: 0.2s linear;
+          transition: .3s linear;
+          transform: scale(.98);
         }
       }
     }

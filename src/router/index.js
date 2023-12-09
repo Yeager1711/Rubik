@@ -25,10 +25,10 @@ const routes = [
     component: () => import('../views/ProductsView.vue')
   },
 
-  {
-    path:'/cart',
-    component: () => import('../views/CartView.vue')
-  },
+  // {
+  //   path:'/cart',
+  //   component: () => import('../views/CartView.vue')
+  // },
 
   {
     path:'/checkout',
@@ -36,9 +36,59 @@ const routes = [
   },
 
   {
+    path:'/login',
+    component: () => import('../views/LoginView.vue')
+  },
+
+  {
+    path:'/register',
+    component: () => import('../views/RegisterView.vue')
+  },
+
+  {
+    path:'/profile',
+    component: () => import('../views/ProfileView.vue')
+  },
+
+
+  //ADMIN LAYOUT ROUTER
+  {
+    path:'/admin/home',
+    component: () => import('../views/admin/AdminHomeView.vue')
+  },
+
+  {
+    path: '/admin/manager',
+    component: () => import('../views/admin/AdminManagerView.vue')
+  },
+
+  {
+    path: '/admin/manager/add-products',
+    component: () => import('../views/admin/controllerView/AddProductView.vue')
+  },
+
+  {
+    path:'/admin/manager/add-products/add-category',
+    component: () => import ('../views/admin/controllerView/AddCategoryView.vue')
+  },
+
+  {
+    path: '/admin/manager/edit/:id',
+    name: 'edit-product',
+    component: () => import('../views/admin/controllerView/AdminEditView.vue')
+},
+
+
+  {
+    path: '/admin/orders',
+    component: () => import('../views/admin/AdminOrdersView.vue')
+  },
+
+  {
     path:'/:pathMatch(.*)*',
     component: () => import('../views/ErrorView.vue')
-  }
+  },
+
 
 ]
 
