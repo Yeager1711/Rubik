@@ -6,8 +6,8 @@
 
     <nav class="navbar">
       <div v-for="(navItem, index) in filteredNavItems" :key="index">
-        <router-link :to="navItem.href" :active-class="navItem.active" tag="a" exact>
-          <div class="link-container" :class="navItem.class">
+        <router-link :to="navItem.href" :active-class="navItem.active" v-slot="{ navigate }">
+          <div class="link-container" :class="navItem.class" @click="navigate">
             <i :class="navItem.icon"></i>
             {{ getNavItemText(navItem) }}
           </div>
@@ -15,24 +15,22 @@
       </div>
 
       <div v-if="loggedInUser">
-        <router-link to="/profile" active-class="active" tag="a" exact>
-          <div class="link-container" style="display: flex; align-items: center;">
-            <i><img v-if="base64Image" :src="base64Image" alt="Avatar" width="35" height="35"
-                style="border-radius: 5rem;" /></i>
+        <router-link to="/profile" active-class="active" v-slot="{ navigate }">
+          <div class="link-container" style="display: flex; align-items: center;" @click="navigate">
+            <i><img v-if="base64Image" :src="base64Image" alt="Avatar" width="35" height="35" style="border-radius: 5rem;" /></i>
             <span class="data-name">{{ loggedInUser }}</span>
           </div>
         </router-link>
       </div>
 
       <div v-else>
-        <router-link to="/login" tag="a">
-          <div class="link-container">
+        <router-link to="/login" v-slot="{ navigate }">
+          <div class="link-container" @click="navigate">
             <i class="fa-solid fa-user" style="visibility: hidden;"></i>
             <span style="visibility: hidden;">Đăng nhập</span>
           </div>
         </router-link>
       </div>
-
     </nav>
 
     <div class="icon">
@@ -40,6 +38,7 @@
     </div>
   </header>
 </template>
+
 
 <script>
 import Cookies from 'js-cookie';
