@@ -19,6 +19,7 @@
         </div>
 
         <div class="contact-local">
+<<<<<<< HEAD
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <h3 style="margin-bottom: .5rem; 
             margin-top: 0;">
@@ -35,6 +36,11 @@
           <p>{{ displayAddress }}</p>
         </div>
         <div class="btn-changesLocal" @click="showModelListAddress">
+=======
+          <p>{{ userInfo.address }}</p>
+        </div>
+        <div class="btn-changesLocal">
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
           Thay đổi
         </div>
       </div>
@@ -52,10 +58,15 @@
           </thead>
           <tbody>
             <tr v-for="(orderItem, index) in cartItems" :key="index">
+<<<<<<< HEAD
               <td>{{ orderItem.product ? orderItem.product.name_product : 'Tên sản phẩm không có' }}</td>
               <td style="font-weight: 550;">
                 {{ orderItem.product ? formattedCurrency(orderItem.product.price) : 'Giá không có' }}
               </td>
+=======
+              <td>{{ orderItem.product.name_product }}</td>
+              <td style="font-weight: 550;">{{ formattedCurrency(orderItem.product.price) }}</td>
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
               <td>{{ orderItem.quantity }}</td>
               <td style="font-weight: 550;">{{ formattedCurrency(orderItem.amount) }}</td>
             </tr>
@@ -95,6 +106,7 @@
         <button class="orderButton" @click="placeOrder"> Đặt hàng </button>
       </div>
     </div>
+<<<<<<< HEAD
 
     <div class="model-address">
       <div class="wrapper-model">
@@ -117,6 +129,8 @@
 
       </div>
     </div>
+=======
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
   </section>
 </template>
 
@@ -132,6 +146,7 @@ export default {
       cartItems: [],
       userInfo: {
         full_name: '',
+<<<<<<< HEAD
         phone_number: '',
         default_address_checked: null,
       },
@@ -141,11 +156,18 @@ export default {
 
     }
 
+=======
+        address: '',
+        phone_number: ''
+      },
+    }
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
   },
 
   mounted() {
     this.fetchCartItems();
     this.fetchUserInfo();
+<<<<<<< HEAD
     // this.fetchAddresses();
 
     // Lấy giá trị từ localStorage
@@ -172,6 +194,8 @@ export default {
       console.error('Lỗi khi lấy địa chỉ từ API.', error);
     }
 
+=======
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
   },
 
   methods: {
@@ -179,7 +203,11 @@ export default {
       try {
         const userId = Cookies.get('user_id');
         const response = await axios.get(`http://localhost:4000/api/carts/${userId}`);
+<<<<<<< HEAD
         // console.log("API Cart:", response.data);
+=======
+        console.log("API Cart:", response.data);
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
         this.cartItems = response.data;
 
         if (this.cartItems.length > 0) {
@@ -188,18 +216,29 @@ export default {
 
         if (this.cartItems.length > 0) {
           await this.fetchAndUpdateProductsInCart();
+<<<<<<< HEAD
 
+=======
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
         }
       } catch (error) {
         console.log('Lỗi khi lấy thông tin giỏ hàng', error);
       }
     },
 
+<<<<<<< HEAD
     async fetchUserInfo() {
       try {
         const userId = Cookies.get('user_id');
         const response = await axios.get(`http://localhost:3007/api/user/${userId}`);
         // console.log("User details:", response.data);
+=======
+    async fetchUserInfo(userId) {
+      console.log("Fetching details user in cart...");
+      try {
+        const response = await axios.get(`http://localhost:3007/api/user/${userId}`);
+        console.log("User details:", response.data);
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
         this.userInfo = response.data;
       } catch (error) {
         console.log("Error fetching user details", error);
@@ -207,6 +246,7 @@ export default {
     },
 
     async fetchAndUpdateProductsInCart() {
+<<<<<<< HEAD
       this.totalAmount = 0;
 
       const promises = this.cartItems.map(async (cartItem) => {
@@ -220,6 +260,21 @@ export default {
             if (this.isValidProductResponse(response)) {
               // console.log("Product details:", response.data);
 
+=======
+      console.log("Fetching and updating product details for cart items...");
+
+      const promises = this.cartItems.map(async (cartItem) => {
+        if (this.isValidCartItem(cartItem)) {
+          console.log("Processing cart item: ", cartItem)
+          try {
+            const productId = cartItem.product_id;
+            const response = await axios.get("http://localhost:3005/api/products/" + productId);
+            console.log("API Response for product details:", response.data);
+
+            if (this.isValidProductResponse(response)) {
+              console.log("Product details:", response.data);
+              // Update the product array for each cart item
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
               this.$set(cartItem, 'product', response.data);
             } else {
               console.error("Invalid product response:", response.data);
@@ -290,6 +345,7 @@ export default {
       }
     },
 
+<<<<<<< HEAD
     async setAsDefault(address) {
       const confirmResult = await Swal.fire({
         title: 'Xác nhận',
@@ -351,6 +407,8 @@ export default {
     },
 
     // async setDe
+=======
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
   },
 
   computed: {
@@ -383,6 +441,7 @@ export default {
       // Nếu có đơn hàng trong giỏ hàng, trả về phí vận chuyển ngẫu nhiên, ngược lại là 0
       return this.cartItems.length > 0 ? randomShippingFee : 0;
     },
+<<<<<<< HEAD
 
     displayAddress() {
       const localStorageAddress = localStorage.getItem('default_check_address');
@@ -405,12 +464,19 @@ export default {
       return null;
     },
   }
+=======
+  },
+
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
 }
 </script>
 
 <style lang="scss" scoped>
 .checkout {
+<<<<<<< HEAD
   position: relative;
+=======
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
   padding: 3rem;
 
   .title-text {
@@ -583,6 +649,7 @@ export default {
       }
     }
   }
+<<<<<<< HEAD
 
   @keyframes toggleListAddress {
     from {
@@ -681,5 +748,7 @@ export default {
       }
     }
   }
+=======
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
 }
 </style>

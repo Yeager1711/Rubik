@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # rubik
+=======
+# plant_rubik
+>>>>>>> f9bdcb07ef995e8f9d3b2c0671ed4e72f4a82cd5
 
 ## Project setup
 ```

@@ -1,0 +1,68 @@
+*Hiểu hơn về search 
+
+   1/ Sử dụng dữ liệu nhập vào với đầu vào v-model
+    2/ Bằng cách lấy dữ liệu có sẵn từ products(Vuex), 
+    3/ Khai báo giá trị trả về ở phần:
+    data() {
+        return {
+            searchQuery:"";  
+        }
+    }
+
+    4/Phần Computed:
+     tạo 1 hàm kết quả tìm kiếm: 
+
+    resultQuery() {
+        if(this.searchQuery){
+          return this.products.filter(item => {
+            return this.searchQuery
+            .toLowerCase()
+            .split("")
+            .every(v => item.name.toLowerCase().includes(v));
+          })
+        }else {
+          return this.products;
+        }
+    }
+
+
+// Tóm tắt code:
+
++Giá trị người dùng muốn tìm kiếm
+    <input type="text" v-model="searchQuery" placeholder="Tìm kiếm sản phẩm...">
+ 
++ Giá trị render sản phẩm theo ý người dùng
+
+    <div v-for="(item, index) in "resultQuery"
+    :key="`item-${index}`"
+    :class="item.class_name"
+    >
+
++Hàm xử lý:
+
+1/
+ data() {
+    return {
+        searchQuery:"",
+    }
+},
+
+2/
+
+computed:{
+    ...mapGetters(["products","storeView"]),
+    
+    // lọc danh sách tìm kiếm thông qua data từ products
+    resultQuery() {
+    if(this.searchQuery){
+        return this.products.filter(item => {
+        return this.searchQuery
+        .toLowerCase()
+        .split("")
+        .every(v => item.name.toLowerCase().includes(v));
+        })
+    }else {
+        return this.products;
+    }
+    }
+},

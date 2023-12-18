@@ -75,6 +75,7 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+
 export default {
     name: "comp-regitser",
     data() {
@@ -172,8 +173,7 @@ export default {
                         avatar: null
                     };
                     console.log(response);
-                    // const userId = response.data.userId;
-                    // this.saveToFirebase(userId);
+                  
                 })
                 .catch(error => {
                     console.error(error);
@@ -196,25 +196,7 @@ export default {
         },
 
         // CompRegister.vue
-        // saveToFirebase(userId) {
-        //     if (firebase && firebase.database) {
-        //         const firebaseRef = firebase.database().ref(`/users/${userId}`);
-        //         const firebaseData = {
-        //             full_name: this.formData.full_name,
-        //             email: this.formData.email,
-        //         };
-
-        //         firebaseRef.set(firebaseData)
-        //             .then(() => {
-        //                 console.log('Đã lưu thông tin vào Firebase');
-        //             })
-        //             .catch(error => {
-        //                 console.error('Lỗi khi lưu thông tin vào Firebase:', error);
-        //             });
-        //     } else {
-        //         console.error('Firebase is not properly initialized.');
-        //     }
-        // }
+        
 
     }
 };
