@@ -20,19 +20,15 @@
 
         <div class="contact-local">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <h3 style="margin-bottom: .5rem; 
-            margin-top: 0;">
-              Địa chỉ
-              <span style="text-transform: none; 
-                color: #e93b3b; 
-                border: .1rem dashed #e93b3b; 
-                font-size: 1.2rem; 
-                padding: .3rem 1rem; 
-                border-radius: .3rem; 
-                margin-left: .5rem;">Mặc định</span>
-            </h3>
+            <!-- Thêm phần này để hiển thị địa chỉ mặc định -->
+            <div class="default-address" v-if="displayDefaultAddress">
+              <h3 style="display: block;">Địa chỉ nhận hàng mặc định:
+                <span style="font-weight: 400; display: block; text-transform: none;">
+                  {{ displayDefaultAddress }}
+                </span>
+              </h3>
+            </div>
           </div>
-          <p>{{ displayAddress }}</p>
         </div>
         <div class="btn-changesLocal" @click="showModelListAddress">
           Thay đổi
@@ -108,9 +104,9 @@
         <div class="address-container">
           <div class="box" v-for="(addr, index) in addresses" :key="index">
             <span>{{ addr.name }}</span>
-            <label>
-              <input type="checkbox" v-model="selectedAddresses[index]" @change="setAsDefault(addr)">
-              <i class="fa-solid fa-check" v-if="isDefaultAddress(addr)"></i>
+            <label @click="setAsDefault(addr)">
+              <input type="checkbox" v-model="selectedAddresses[index]">
+              <i class="fa-solid fa-check" v-if="addr.isDefault"></i>
             </label>
           </div>
         </div>
@@ -147,15 +143,6 @@ export default {
     this.fetchCartItems();
     this.fetchUserInfo();
     // this.fetchAddresses();
-
-    // Lấy giá trị từ localStorage
-    const localStorageAddress = localStorage.getItem('default_address_checked');
-
-    // Kiểm tra xem giá trị có tồn tại không
-    if (localStorageAddress !== null) {
-      // Gán giá trị cho this.userInfo.default_address_checked
-      this.userInfo.default_address_checked = localStorageAddress;
-    }
   },
 
   async created() {
@@ -165,13 +152,23 @@ export default {
       return;
     }
     try {
+      const storedSelectedAddresses = localStorage.getItem('selectedAddresses');
+      console.log('Stored selected addresses:', storedSelectedAddresses);
+
       const response = await axios.get(`http://localhost:3008/api/address/${userId}`);
       this.addresses = response.data;
+
+      // Đặt thuộc tính isDefault dựa trên địa chỉ mặc định
+      const defaultAddressId = this.userInfo.default_address_checked;
+      this.addresses.forEach(addr => {
+        addr.isDefault = addr.address_Id === defaultAddressId;
+      });
       this.selectedAddresses = new Array(this.addresses.length).fill(false);
+      this.selectedAddresses = storedSelectedAddresses ? JSON.parse(storedSelectedAddresses) : [];
+
     } catch (error) {
       console.error('Lỗi khi lấy địa chỉ từ API.', error);
     }
-
   },
 
   methods: {
@@ -308,16 +305,24 @@ export default {
           });
 
           if (responseSetDefaultAddress.status === 200) {
-            // Cập nhật giá trị trong localStorage khi người dùng chọn địa chỉ mặc định
-            localStorage.setItem('default_check_address', address.address_Id);
-
             await Swal.fire({
               icon: 'success',
               title: 'Thành công',
               timer: 1200,
             });
 
-            location.reload();
+            // Cập nhật trạng thái isDefault cho địa chỉ đã chọn
+            this.addresses.forEach(addr => {
+              addr.isDefault = addr.address_Id === address.address_Id;
+            });
+
+            // Loại bỏ checkbox của địa chỉ đã chọn
+            this.selectedAddresses.forEach((selected, i) => {
+              this.$set(this.selectedAddresses, i, false);
+            });
+
+            localStorage.setItem('selectedAddresses', JSON.stringify(this.selectedAddresses));
+
           } else {
             console.error('Lỗi khi cập nhật địa chỉ mặc định');
             await Swal.fire({
@@ -334,9 +339,8 @@ export default {
       }
     },
 
-    isDefaultAddress(address) {
-      const localStorageAddress = localStorage.getItem('default_address_checked');
-      return address.address_Id === parseInt(localStorageAddress);
+    isDefaultAddress() {
+      return this.userInfo.default_address_checked !== null;
     },
 
     //control address
@@ -384,25 +388,9 @@ export default {
       return this.cartItems.length > 0 ? randomShippingFee : 0;
     },
 
-    displayAddress() {
-      const localStorageAddress = localStorage.getItem('default_check_address');
-
-      // Nếu có địa chỉ được chọn từ local storage
-      if (localStorageAddress) {
-        const selectedAddresses = this.addresses.find(addr => addr.address_Id === parseInt(localStorageAddress));
-        return selectedAddresses ? selectedAddresses.name : null;
-      }
-
-      // Nếu không có địa chỉ được chọn từ local storage, kiểm tra xem có địa chỉ mặc định từ API không
-      const defaultAddress = this.addresses.find(addr => addr.check_default === "1");
-
-      // Cập nhật giá trị trong localStorage nếu có địa chỉ mặc định
-      if (defaultAddress) {
-        localStorage.setItem('default_check_address', defaultAddress.address_Id);
-        return defaultAddress.name;
-      }
-
-      return null;
+    displayDefaultAddress() {
+      const defaultAddress = this.addresses.find(addr => addr.check_default === '1');
+      return defaultAddress ? defaultAddress.name : null;
     },
   }
 }

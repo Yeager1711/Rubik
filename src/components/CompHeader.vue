@@ -6,8 +6,8 @@
 
     <nav class="navbar">
       <div v-for="(navItem, index) in filteredNavItems" :key="index">
-        <router-link :to="navItem.href" :active-class="navItem.active" v-slot="{ navigate }">
-          <div class="link-container" :class="navItem.class" @click="navigate">
+        <router-link :to="navItem.href" :active-class="navItem.active" tag="a" exact>
+          <div class="link-container" :class="navItem.class">
             <i :class="navItem.icon"></i>
             {{ getNavItemText(navItem) }}
           </div>
@@ -15,22 +15,24 @@
       </div>
 
       <div v-if="loggedInUser">
-        <router-link to="/profile" active-class="active" v-slot="{ navigate }">
-          <div class="link-container" style="display: flex; align-items: center;" @click="navigate">
-            <i><img v-if="base64Image" :src="base64Image" alt="Avatar" width="35" height="35" style="border-radius: 5rem;" /></i>
+        <router-link to="/profile" active-class="active" tag="a" exact>
+          <div class="link-container" style="display: flex; align-items: center;">
+            <i><img v-if="base64Image" :src="base64Image" alt="Avatar" width="35" height="35"
+                style="border-radius: 5rem;" /></i>
             <span class="data-name">{{ loggedInUser }}</span>
           </div>
         </router-link>
       </div>
 
       <div v-else>
-        <router-link to="/login" v-slot="{ navigate }">
-          <div class="link-container" @click="navigate">
+        <router-link v-if="$cookies.get('user_id') === undefined" to="/login" tag="a">
+          <div class="link-container">
             <i class="fa-solid fa-user" style="visibility: hidden;"></i>
             <span style="visibility: hidden;">Đăng nhập</span>
           </div>
         </router-link>
       </div>
+
     </nav>
 
     <div class="icon">
@@ -38,7 +40,6 @@
     </div>
   </header>
 </template>
-
 
 <script>
 import Cookies from 'js-cookie';
@@ -76,7 +77,7 @@ export default {
         },
         {
           enable: 'enable-control',
-          list: "Giỏ hàng",
+          list: "Quản lý đơn hàng",
           href: "/cart",
           img: require('../components/images/cart-img.png'),
           active: "active",
@@ -106,14 +107,18 @@ export default {
 
   computed: {
     filteredNavItems() {
-      if (this.loggedInUser !== undefined && this.roleID === '1') {
-        return this.navItems.filter(item => item.enable !== 'enable-control');
+      if (this.loggedInUser !== undefined) {
+        return this.navItems.filter(item => {
+          if (this.roleID === '1') {
+            return item.enable !== 'enable-control';
+          } else if (this.roleID === '2') {
+            return item.enable !== 'disableLogin';
+          } else {
+            return true
+          }
+        });
       } else {
-        if (this.loggedInUser !== undefined && this.roleID === '2') {
-          return this.navItems.filter(item => item.disable !== 'disableLogin')
-        } else {
-          return this.navItems;
-        }
+        return this.navItems;
       }
     }
   },
@@ -167,7 +172,31 @@ export default {
 
     updateNavItemsHref(roleID) {
       this.navItems.forEach(item => {
-        if (roleID === '1') {
+        if (roleID === '2') {
+          switch (item.list) {
+            case "Trang chủ":
+              item.href = roleID === '1' ? "/admin/home" : "/";
+              break;
+            case "Giới thiệu":
+              item.href = "/about";
+              break;
+            case "Danh mục":
+              item.href = "/products";
+              break;
+            case "Quản lý đơn hàng":
+              item.href = "/order/history";
+              break;
+            case "Thanh toán":
+              item.href = "/checkout";
+              break;
+            case "Đăng nhập":
+              item.href = "/login";
+              break;
+            default:
+              item.href = "";
+              break;
+          }
+        } else if (roleID === '1') {
           switch (item.list) {
             case "Trang chủ":
               item.href = "/admin/home";
@@ -185,10 +214,9 @@ export default {
               item.href = "";
               break;
           }
-        } else {
-          item.href = "";
         }
-      })
+
+        });
     }
   },
 };

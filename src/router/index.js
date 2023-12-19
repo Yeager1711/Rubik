@@ -50,6 +50,10 @@ const routes = [
     component: () => import('../views/ProfileView.vue')
   },
 
+  {
+    path:'/order/history',
+    component: () => import('../views/ManagerOrdersView.vue')
+  },
 
   //ADMIN LAYOUT ROUTER
   {
