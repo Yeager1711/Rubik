@@ -132,7 +132,6 @@ export default {
 
             // Nếu tab được chọn là 'all-orders', không gọi API
             if (tabId !== 'all-orders') {
-                // Gọi API để lấy dữ liệu cho tab được chọn
                 this.fetchDataAllOrders(tabId);
             }
         },

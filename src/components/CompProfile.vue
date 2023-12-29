@@ -96,8 +96,10 @@
               <option value="2">Nữ</option>
               <option value="3">Khác</option>
             </select>
-
           </div>
+
+          <button class="send-gmail" style="padding: .8rem 3rem;
+          background: #54ae8a; color: #fff; border-radius: 1rem;">Gởi email đổi mật khẩu</button>
 
         </div>
       </form>

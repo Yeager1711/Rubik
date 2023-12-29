@@ -311,6 +311,8 @@ export default {
               timer: 1200,
             });
 
+            window.location.reload()
+
             // Cập nhật trạng thái isDefault cho địa chỉ đã chọn
             this.addresses.forEach(addr => {
               addr.isDefault = addr.address_Id === address.address_Id;
